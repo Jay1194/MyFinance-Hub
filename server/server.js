@@ -8,7 +8,7 @@ const userRoutes = require('./src/routes/userRoutes');
 const budgetRoutes = require('./src/routes/budgetRoutes');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors());
@@ -21,7 +21,7 @@ connectDB();
 // Routes
 app.use('/api/plaid', plaidRoutes);
 app.use('/api/transactions', transactionRoutes);
-app.use('/api/user', userRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/budgets', budgetRoutes);
 
 // Error handling middleware
