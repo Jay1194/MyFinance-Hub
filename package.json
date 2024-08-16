@@ -1,0 +1,24 @@
+{
+  "name": "myfinance",
+  "version": "1.0.0",
+  "description": "A comprehensive tool designed to help users manage their finances effectively. This dashboard allows users to track income and expenses, set budgets, monitor financial goals, and manage investments. It provides insightful reports and integrates with bank accounts for automatic transaction syncing.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "^5.1.1",
+    "body-parser": "^1.20.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.8.0",
+    "mongoose": "^8.5.3",
+    "node-cron": "^3.0.3",
+    "plaid": "^26.0.0"
+  }
+}
