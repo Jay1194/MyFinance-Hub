@@ -11,6 +11,11 @@ function App() {
     setToken(newToken);
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setToken(null);
+  };
+
   return (
     <Router>
       <Routes>
@@ -18,7 +23,7 @@ function App() {
           token ? <Navigate to="/" replace /> : <Login setToken={handleSetToken} />
         } />
         <Route path="/" element={
-          token ? <Dashboard token={token} /> : <Navigate to="/login" replace />
+          token ? <Dashboard token={token} onLogout={handleLogout} /> : <Navigate to="/login" replace />
         } />
       </Routes>
     </Router>

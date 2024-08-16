@@ -1,32 +1,43 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { List, ListItem, ListItemText, Typography, Box } from '@mui/material';
+import { List, ListItem, ListItemText, Typography, Box, CircularProgress } from '@mui/material';
 
-const BudgetList = ({ token }) => {
+const BudgetList = ({ token, onBudgetSelect }) => {
   const [budgets, setBudgets] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchBudgets = async () => {
-      try {
-        const response = await axios.get('http://localhost:3000/api/budgets', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setBudgets(response.data);
-      } catch (error) {
-        console.error('Error fetching budgets:', error);
-      }
-    };
     fetchBudgets();
   }, [token]);
+
+  const fetchBudgets = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:3000/api/budgets', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setBudgets(response.data);
+      setError(null);
+    } catch (error) {
+      console.error('Error fetching budgets:', error);
+      setError('Failed to fetch budgets. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <CircularProgress />;
+  if (error) return <Typography color="error">{error}</Typography>;
 
   return (
     <List>
       {budgets.map((budget) => (
-        <ListItem key={budget._id}>
+        <ListItem key={budget._id} button onClick={() => onBudgetSelect(budget._id)}>
           <ListItemText
             primary={budget.category}
             secondary={
-              <>
+              <React.Fragment>
                 <Typography component="span" variant="body2">
                   ${budget.spent.toFixed(2)} / ${budget.amount.toFixed(2)}
                 </Typography>
@@ -35,7 +46,7 @@ const BudgetList = ({ token }) => {
                     width: '100%',
                     backgroundColor: '#e0e0e0',
                     borderRadius: 1,
-                    mr: 1,
+                    mt: 1,
                   }}
                 >
                   <Box
@@ -47,7 +58,7 @@ const BudgetList = ({ token }) => {
                     }}
                   />
                 </Box>
-              </>
+              </React.Fragment>
             }
           />
         </ListItem>
