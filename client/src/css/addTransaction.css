@@ -1,0 +1,17 @@
+.add-transaction-form {
+    padding: 20px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    margin-top: 20px;
+  }
+  
+  .add-transaction-form form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .add-transaction-form .MuiTextField-root,
+  .add-transaction-form .MuiSelect-root {
+    background-color: white;
+  }

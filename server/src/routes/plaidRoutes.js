@@ -42,6 +42,32 @@ router.post('/set_access_token', authenticateToken, async (req, res) => {
   }
 });
 
+router.get('/status', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    res.json({ linked: !!user.plaidAccessToken });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to check Plaid status' });
+  }
+});
+
+router.get('/balances', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user.plaidAccessToken) {
+      return res.status(400).json({ error: 'Plaid account not connected' });
+    }
+
+    const balanceResponse = await plaidClient.accountsBalanceGet({
+      access_token: user.plaidAccessToken
+    });
+
+    res.json(balanceResponse.data.accounts);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch balances' });
+  }
+});
+
 router.get('/transactions', authenticateToken, async (req, res) => {
   try {
     const user = await User.findById(req.user.id);

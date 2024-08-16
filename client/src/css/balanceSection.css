@@ -1,0 +1,16 @@
+.balance-section {
+    padding: 15px;
+  }
+  
+  .balance-section .MuiListItem-root {
+    padding-left: 0;
+    padding-right: 0;
+  }
+  
+  .balance-section .MuiListItemText-primary {
+    font-weight: bold;
+  }
+  
+  .balance-section .MuiListItemText-secondary {
+    color: #4caf50;
+  }

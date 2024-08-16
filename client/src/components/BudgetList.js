@@ -1,39 +1,41 @@
 import React, { useState, useEffect } from 'react';
+import { 
+  List, ListItem, ListItemText, ListItemSecondaryAction, 
+  Typography, LinearProgress, Box, Chip, IconButton 
+} from '@mui/material';
+import { ArrowForward } from '@mui/icons-material';
 import axios from 'axios';
-import { List, ListItem, ListItemText, Typography, Box, CircularProgress } from '@mui/material';
+import '../css/budgetList.css';
 
 const BudgetList = ({ token, onBudgetSelect }) => {
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
+    const fetchBudgets = async () => {
+      try {
+        setLoading(true);
+        const response = await axios.get('http://localhost:3000/api/budgets', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setBudgets(response.data);
+      } catch (error) {
+        console.error('Error fetching budgets:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
     fetchBudgets();
   }, [token]);
 
-  const fetchBudgets = async () => {
-    try {
-      setLoading(true);
-      const response = await axios.get('http://localhost:3000/api/budgets', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setBudgets(response.data);
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching budgets:', error);
-      setError('Failed to fetch budgets. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (loading) return <CircularProgress />;
-  if (error) return <Typography color="error">{error}</Typography>;
+  if (loading) {
+    return <LinearProgress className="budget-progress" />;
+  }
 
   return (
     <List>
       {budgets.map((budget) => (
-        <ListItem key={budget._id} button onClick={() => onBudgetSelect(budget._id)}>
+        <ListItem key={budget._id}>
           <ListItemText
             primary={budget.category}
             secondary={
@@ -41,26 +43,24 @@ const BudgetList = ({ token, onBudgetSelect }) => {
                 <Typography component="span" variant="body2">
                   ${budget.spent.toFixed(2)} / ${budget.amount.toFixed(2)}
                 </Typography>
-                <Box
-                  sx={{
-                    width: '100%',
-                    backgroundColor: '#e0e0e0',
-                    borderRadius: 1,
-                    mt: 1,
-                  }}
-                >
-                  <Box
-                    sx={{
-                      width: `${(budget.spent / budget.amount) * 100}%`,
-                      backgroundColor: 'primary.main',
-                      height: 8,
-                      borderRadius: 1,
-                    }}
-                  />
-                </Box>
+                <LinearProgress
+                  variant="determinate"
+                  value={(budget.spent / budget.amount) * 100}
+                  style={{ marginTop: 8, marginBottom: 8 }}
+                />
+                <Chip
+                  label={`${((budget.spent / budget.amount) * 100).toFixed(0)}% used`}
+                  color={budget.spent > budget.amount ? "secondary" : "primary"}
+                  size="small"
+                />
               </React.Fragment>
             }
           />
+          <ListItemSecondaryAction>
+            <IconButton edge="end" onClick={() => onBudgetSelect(budget._id)}>
+              <ArrowForward />
+            </IconButton>
+          </ListItemSecondaryAction>
         </ListItem>
       ))}
     </List>

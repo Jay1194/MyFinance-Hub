@@ -1,0 +1,18 @@
+.budget-list {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  .budget-item {
+    margin-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .budget-progress {
+    margin-top: 8px;
+    margin-bottom: 8px;
+  }
+  
+  .budget-chip {
+    margin-top: 8px;
+  }

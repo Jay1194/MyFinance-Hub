@@ -1,0 +1,13 @@
+.transaction-list {
+    max-height: 400px;
+    overflow-y: auto;
+  }
+  
+  .transaction-item {
+    margin-bottom: 10px;
+    border-bottom: 1px solid #e0e0e0;
+  }
+  
+  .transaction-category {
+    margin-right: 10px;
+  }

@@ -1,0 +1,44 @@
+.dashboard-container {
+    padding-top: 30px;
+    padding-bottom: 30px;
+  }
+  
+  .loading-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .app-bar {
+    background-color: #2196f3;
+  }
+  
+  .app-title {
+    flex-grow: 1;
+  }
+  
+  .error-message {
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #ffebee;
+    border-radius: 4px;
+  }
+  
+  .plaid-button-container {
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  .balance-paper,
+  .insights-paper,
+  .section-paper {
+    padding: 20px;
+    height: 100%;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+  }
+  
+  .add-button {
+    margin-top: 20px;
+  }
