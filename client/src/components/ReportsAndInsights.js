@@ -16,15 +16,21 @@ const ReportsAndInsights = ({ token }) => {
   const fetchReportData = async () => {
     try {
       setLoading(true);
-      const expensesResponse = await axios.get('http://localhost:3000/api/reports/expenses-by-category', {
+      const expensesResponse = await axios.get('http://localhost:3000/api/reports/spending-by-category', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setExpensesByCategory(expensesResponse.data);
+      setExpensesByCategory(expensesResponse.data.map(item => ({
+        name: item._id,
+        value: Math.abs(item.total)
+      })));
 
       const spendingResponse = await axios.get('http://localhost:3000/api/reports/monthly-spending', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setMonthlySpending(spendingResponse.data);
+      setMonthlySpending(spendingResponse.data.map(item => ({
+        month: new Date(2023, item._id - 1, 1).toLocaleString('default', { month: 'short' }),
+        amount: Math.abs(item.total)
+      })));
       setError(null);
     } catch (error) {
       console.error('Error fetching report data:', error);

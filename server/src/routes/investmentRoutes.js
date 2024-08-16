@@ -4,6 +4,8 @@ const { authenticateToken } = require('../middlewares/auth');
 const { alphaVantageRateLimiter } = require('../middlewares/rateLimiter');
 const Investment = require('../models/Investment');
 const axios = require('axios');
+const { getStockPrice } = require('../services/alphaVantageService');
+
 
 const ALPHA_VANTAGE_API_KEY = process.env.ALPHA_VANTAGE_API_KEY;
 
@@ -34,15 +36,24 @@ router.post('/', authenticateToken, async (req, res) => {
 });
 
 // Get current stock price
-router.get('/price/:symbol', authenticateToken, alphaVantageRateLimiter, async (req, res) => {
-    try {
-      const response = await axios.get(`https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${req.params.symbol}&apikey=${ALPHA_VANTAGE_API_KEY}`);
-      const price = response.data['Global Quote']['05. price'];
-      res.json({ price });
-    } catch (error) {
-      res.status(500).json({ error: 'Failed to fetch stock price' });
-    }
-  });
+router.get('/current-values', authenticateToken, alphaVantageRateLimiter, async (req, res) => {
+  try {
+    const investments = await Investment.find({ userId: req.user.id });
+    const investmentsWithCurrentValue = await Promise.all(investments.map(async (investment) => {
+      const currentPrice = await getStockPrice(investment.symbol);
+      return {
+        ...investment.toObject(),
+        currentValue: currentPrice * investment.shares,
+        profit: (currentPrice - investment.purchasePrice) * investment.shares
+      };
+    }));
+    res.json(investmentsWithCurrentValue);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch current investment values' });
+  }
+});
+
+module.exports = router;
   
 
 module.exports = router;
