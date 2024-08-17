@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { TextField, Button, Typography, Container } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+
 
 const Login = ({ setToken }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -14,6 +17,10 @@ const Login = ({ setToken }) => {
     } catch (error) {
       console.error('Login failed:', error);
     }
+  };
+
+  const handleRegisterClick = () => {
+    navigate('/register'); // Navigate to the Register page
   };
 
   return (
@@ -42,6 +49,11 @@ const Login = ({ setToken }) => {
         <Button type="submit" fullWidth variant="contained" color="primary">
           Login
         </Button>
+        <div mt={2} textAlign="center">
+          <Button onClick={handleRegisterClick} variant="text" color="primary">
+            Or register
+          </Button>
+          </div>
       </form>
     </Container>
   );

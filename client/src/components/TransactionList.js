@@ -1,64 +1,42 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  List, ListItem, ListItemText, ListItemSecondaryAction, 
-  Typography, IconButton, Chip 
-} from '@mui/material';
-import { Delete } from '@mui/icons-material';
 import axios from 'axios';
-import '../css/transactionList.css';
+import { List, ListItem, ListItemText, Typography } from '@mui/material';
 
 const TransactionList = ({ token }) => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchTransactions = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get('http://localhost:3000/api/transactions', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setTransactions(response.data);
-      } catch (error) {
-        console.error('Error fetching transactions:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchTransactions();
   }, [token]);
 
-  if (loading) {
-    return <Typography>Loading transactions...</Typography>;
-  }
+  const fetchTransactions = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:3000/api/transactions', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setTransactions(response.data);
+    } catch (error) {
+      console.error('Error fetching transactions:', error);
+      setError('Failed to fetch transactions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <Typography>Loading transactions...</Typography>;
+  if (error) return <Typography color="error">{error}</Typography>;
 
   return (
-    <List className="transaction-list">
+    <List>
       {transactions.map((transaction) => (
-        <ListItem key={transaction._id} className="transaction-item">
+        <ListItem key={transaction._id}>
           <ListItemText
             primary={transaction.description}
-            secondary={
-              <>
-                <Typography component="span" variant="body2" color="textPrimary">
-                  ${Math.abs(transaction.amount).toFixed(2)}
-                </Typography>
-                {" — "}{new Date(transaction.date).toLocaleDateString()}
-              </>
-            }
+            secondary={`$${transaction.amount} - ${transaction.category}`}
           />
-          <ListItemSecondaryAction>
-            <Chip 
-              label={transaction.category} 
-              color="primary" 
-              variant="outlined" 
-              size="small"
-              className="transaction-category"
-            />
-            <IconButton edge="end" aria-label="delete">
-              <Delete />
-            </IconButton>
-          </ListItemSecondaryAction>
         </ListItem>
       ))}
     </List>

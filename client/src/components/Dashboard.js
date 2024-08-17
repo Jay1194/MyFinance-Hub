@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   Container, Grid, Paper, Typography, Button, AppBar, Toolbar, 
-  CircularProgress, Box, ThemeProvider, createTheme, CssBaseline,
-  Select, MenuItem, FormControl, InputLabel
+  CircularProgress, Box, ThemeProvider, createTheme, CssBaseline
 } from '@mui/material';
 import axios from 'axios';
 import BudgetList from './BudgetList';
@@ -31,63 +30,50 @@ const theme = createTheme({
   },
 });
 
-// Predefined categories
-export const CATEGORIES = [
-  'Food & Dining', 'Transportation', 'Housing', 'Utilities', 'Healthcare',
-  'Personal', 'Entertainment', 'Education', 'Shopping', 'Travel', 'Income'
-];
-
 const Dashboard = ({ token, onLogout }) => {
   const [showAddBudget, setShowAddBudget] = useState(false);
   const [showAddTransaction, setShowAddTransaction] = useState(false);
   const [plaidLinked, setPlaidLinked] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [accounts, setAccounts] = useState([]);
-  const [selectedAccount, setSelectedAccount] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const checkPlaidStatus = async () => {
       try {
         setLoading(true);
-        const [statusResponse, accountsResponse] = await Promise.all([
-          axios.get('http://localhost:3000/api/plaid/status', {
-            headers: { Authorization: `Bearer ${token}` }
-          }),
-          axios.get('http://localhost:3000/api/plaid/accounts', {
-            headers: { Authorization: `Bearer ${token}` }
-          })
-        ]);
-        setPlaidLinked(statusResponse.data.linked);
-        setAccounts(accountsResponse.data);
-        if (accountsResponse.data.length > 0) {
-          setSelectedAccount(accountsResponse.data[0].account_id);
-        }
+        const response = await axios.get('http://localhost:3000/api/plaid/status', {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        setPlaidLinked(response.data.linked);
       } catch (error) {
-        console.error('Error fetching data:', error);
-        setError('Failed to fetch account data. Please try again later.');
+        console.error('Error checking Plaid status:', error);
+        setError('Failed to check Plaid status');
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
+
+    checkPlaidStatus();
   }, [token]);
+
+  const handleRefresh = () => {
+    setRefreshKey(old => old + 1);
+  };
 
   const handlePlaidSuccess = () => {
     setPlaidLinked(true);
+    handleRefresh();
   };
 
   const handleBudgetAdded = () => {
     setShowAddBudget(false);
+    handleRefresh();
   };
 
   const handleTransactionAdded = () => {
     setShowAddTransaction(false);
-  };
-
-  const handleBudgetSelect = (budgetId) => {
-    console.log('Selected budget:', budgetId);
-    // Implement budget selection logic here
+    handleRefresh();
   };
 
   if (loading) return (
@@ -109,41 +95,28 @@ const Dashboard = ({ token, onLogout }) => {
       </AppBar>
       <Container className="dashboard-container">
         {error && <Typography color="error" className="error-message">{error}</Typography>}
-        {!plaidLinked && (
-          <Box className="plaid-button-container">
+        <Box className="plaid-button-container" mb={2}>
+          {!plaidLinked ? (
             <PlaidLinkButton token={token} onSuccess={handlePlaidSuccess} />
-          </Box>
-        )}
-        {plaidLinked && (
-          <FormControl fullWidth margin="normal">
-            <InputLabel>Select Account</InputLabel>
-            <Select
-              value={selectedAccount}
-              onChange={(e) => setSelectedAccount(e.target.value)}
-            >
-              {accounts.map((account) => (
-                <MenuItem key={account.account_id} value={account.account_id}>
-                  {account.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
+          ) : (
+            <Typography>Plaid account connected</Typography>
+          )}
+        </Box>
         <Grid container spacing={3}>
           <Grid item xs={12} md={6}>
             <Paper className="balance-paper">
-              <BalanceSection token={token} selectedAccount={selectedAccount} />
+              <BalanceSection token={token} refreshKey={refreshKey} plaidLinked={plaidLinked} />
             </Paper>
           </Grid>
           <Grid item xs={12} md={6}>
             <Paper className="insights-paper">
-              <ReportsAndInsights token={token} selectedAccount={selectedAccount} />
+              <ReportsAndInsights token={token} refreshKey={refreshKey} plaidLinked={plaidLinked} />
             </Paper>
           </Grid>
           <Grid item xs={12} md={6}>
             <Paper className="section-paper">
               <Typography variant="h6">Budgets</Typography>
-              <BudgetList token={token} onBudgetSelect={handleBudgetSelect} />
+              <BudgetList token={token} refreshKey={refreshKey} />
               <Button 
                 onClick={() => setShowAddBudget(true)} 
                 className="add-button"
@@ -157,7 +130,6 @@ const Dashboard = ({ token, onLogout }) => {
                   token={token} 
                   onBudgetAdded={handleBudgetAdded} 
                   onCancel={() => setShowAddBudget(false)}
-                  categories={CATEGORIES}
                 />
               )}
             </Paper>
@@ -165,7 +137,7 @@ const Dashboard = ({ token, onLogout }) => {
           <Grid item xs={12} md={6}>
             <Paper className="section-paper">
               <Typography variant="h6">Transactions</Typography>
-              <TransactionList token={token} selectedAccount={selectedAccount} />
+              <TransactionList token={token} refreshKey={refreshKey} />
               <Button 
                 onClick={() => setShowAddTransaction(true)} 
                 className="add-button"
@@ -179,8 +151,6 @@ const Dashboard = ({ token, onLogout }) => {
                   token={token} 
                   onTransactionAdded={handleTransactionAdded} 
                   onCancel={() => setShowAddTransaction(false)}
-                  categories={CATEGORIES}
-                  selectedAccount={selectedAccount}
                 />
               )}
             </Paper>

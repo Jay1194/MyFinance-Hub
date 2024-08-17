@@ -14,7 +14,6 @@ router.get('/users', async (req, res) => {
   }
 });
 
-
 router.post('/register', async (req, res) => {
   try {
     console.log('Registration attempt:', req.body);
@@ -44,6 +43,10 @@ router.post('/register', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// ... other routes ...
+
+module.exports = router;
 
 router.post('/login', async (req, res) => {
   try {

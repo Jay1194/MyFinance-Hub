@@ -153,4 +153,22 @@ router.get('/financial_overview', authenticateToken, async (req, res) => {
   }
 });
 
+router.get('/accounts', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user.plaidAccessToken) {
+      return res.status(400).json({ error: 'Plaid account not connected' });
+    }
+
+    const response = await plaidClient.accountsGet({
+      access_token: user.plaidAccessToken
+    });
+
+    res.json(response.data.accounts);
+  } catch (error) {
+    console.error('Error fetching Plaid accounts:', error);
+    res.status(500).json({ error: 'Failed to fetch accounts' });
+  }
+});
+
 module.exports = router;

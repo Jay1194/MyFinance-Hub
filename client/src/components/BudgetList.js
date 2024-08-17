@@ -1,36 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  List, ListItem, ListItemText, ListItemSecondaryAction, 
-  Typography, LinearProgress, Box, Chip, IconButton 
-} from '@mui/material';
-import { ArrowForward } from '@mui/icons-material';
 import axios from 'axios';
-import '../css/budgetList.css';
+import { List, ListItem, ListItemText, Typography } from '@mui/material';
 
-const BudgetList = ({ token, onBudgetSelect }) => {
+const BudgetList = ({ token }) => {
   const [budgets, setBudgets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchBudgets = async () => {
-      try {
-        setLoading(true);
-        const response = await axios.get('http://localhost:3000/api/budgets', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        setBudgets(response.data);
-      } catch (error) {
-        console.error('Error fetching budgets:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchBudgets();
   }, [token]);
 
-  if (loading) {
-    return <LinearProgress className="budget-progress" />;
-  }
+  const fetchBudgets = async () => {
+    try {
+      setLoading(true);
+      const response = await axios.get('http://localhost:3000/api/budgets', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setBudgets(response.data);
+    } catch (error) {
+      console.error('Error fetching budgets:', error);
+      setError('Failed to fetch budgets');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <Typography>Loading budgets...</Typography>;
+  if (error) return <Typography color="error">{error}</Typography>;
 
   return (
     <List>
@@ -38,29 +35,8 @@ const BudgetList = ({ token, onBudgetSelect }) => {
         <ListItem key={budget._id}>
           <ListItemText
             primary={budget.category}
-            secondary={
-              <React.Fragment>
-                <Typography component="span" variant="body2">
-                  ${budget.spent.toFixed(2)} / ${budget.amount.toFixed(2)}
-                </Typography>
-                <LinearProgress
-                  variant="determinate"
-                  value={(budget.spent / budget.amount) * 100}
-                  style={{ marginTop: 8, marginBottom: 8 }}
-                />
-                <Chip
-                  label={`${((budget.spent / budget.amount) * 100).toFixed(0)}% used`}
-                  color={budget.spent > budget.amount ? "secondary" : "primary"}
-                  size="small"
-                />
-              </React.Fragment>
-            }
+            secondary={`$${budget.amount} - $${budget.spent} spent`}
           />
-          <ListItemSecondaryAction>
-            <IconButton edge="end" onClick={() => onBudgetSelect(budget._id)}>
-              <ArrowForward />
-            </IconButton>
-          </ListItemSecondaryAction>
         </ListItem>
       ))}
     </List>

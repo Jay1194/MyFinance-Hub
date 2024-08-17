@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
+import Register from './components/Register';
 
 function App() {
   const [token, setToken] = useState(localStorage.getItem('token'));
@@ -21,6 +22,9 @@ function App() {
       <Routes>
         <Route path="/login" element={
           token ? <Navigate to="/" replace /> : <Login setToken={handleSetToken} />
+        } />
+        <Route path="/register" element={
+          token ? <Navigate to="/" replace /> : <Register setToken={handleSetToken}/>
         } />
         <Route path="/" element={
           token ? <Dashboard token={token} onLogout={handleLogout} /> : <Navigate to="/login" replace />

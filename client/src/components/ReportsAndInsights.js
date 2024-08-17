@@ -3,49 +3,59 @@ import axios from 'axios';
 import { Typography, Grid, CircularProgress } from '@mui/material';
 import { PieChart, Pie, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
-const ReportsAndInsights = ({ token }) => {
+const ReportsAndInsights = ({ token, refreshKey, plaidLinked }) => {
   const [expensesByCategory, setExpensesByCategory] = useState([]);
   const [monthlySpending, setMonthlySpending] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
+    const fetchReportData = async () => {
+      if (!plaidLinked) return;
+
+      try {
+        setLoading(true);
+        const [expensesResponse, spendingResponse] = await Promise.all([
+          axios.get('http://localhost:3000/api/reports/spending-by-category', {
+            headers: { Authorization: `Bearer ${token}` }
+          }),
+          axios.get('http://localhost:3000/api/reports/monthly-spending', {
+            headers: { Authorization: `Bearer ${token}` }
+          })
+        ]);
+
+        setExpensesByCategory(expensesResponse.data.map(item => ({
+          name: item.category,
+          value: Math.abs(item.total)
+        })));
+
+        setMonthlySpending(spendingResponse.data.map(item => ({
+          month: new Date(item.month).toLocaleString('default', { month: 'short' }),
+          amount: Math.abs(item.total)
+        })));
+
+        setError(null);
+      } catch (error) {
+        console.error('Error fetching report data:', error);
+        setError('Failed to fetch report data. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchReportData();
-  }, [token]);
+  }, [token, plaidLinked, refreshKey]);
 
-  const fetchReportData = async () => {
-    try {
-      setLoading(true);
-      const expensesResponse = await axios.get('http://localhost:3000/api/reports/spending-by-category', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setExpensesByCategory(expensesResponse.data.map(item => ({
-        name: item._id,
-        value: Math.abs(item.total)
-      })));
-
-      const spendingResponse = await axios.get('http://localhost:3000/api/reports/monthly-spending', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      setMonthlySpending(spendingResponse.data.map(item => ({
-        month: new Date(2023, item._id - 1, 1).toLocaleString('default', { month: 'short' }),
-        amount: Math.abs(item.total)
-      })));
-      setError(null);
-    } catch (error) {
-      console.error('Error fetching report data:', error);
-      setError('Failed to fetch report data. Please try again later.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  if (!plaidLinked) {
+    return <Typography>Connect your bank account to see reports and insights.</Typography>;
+  }
 
   if (loading) return <CircularProgress />;
   if (error) return <Typography color="error">{error}</Typography>;
 
   return (
     <div>
-      <Typography variant="h6">Reports and Insights</Typography>
+      <Typography variant="h6" gutterBottom>Reports and Insights</Typography>
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <Typography variant="subtitle1">Expenses by Category</Typography>
