@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
 import { 
-  TextField, Button, Typography, Box, Select, MenuItem, FormControl, InputLabel
+  TextField, Button, Typography, Box, Select, MenuItem, FormControl, InputLabel 
 } from '@mui/material';
 import axios from 'axios';
-import '../css/addTransaction.css';
 
-const AddTransaction = ({ token, onTransactionAdded, onCancel, categories, selectedAccount }) => {
+const AddTransaction = ({ token, onTransactionAdded, onCancel, categories }) => {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [category, setCategory] = useState('');
@@ -15,12 +14,18 @@ const AddTransaction = ({ token, onTransactionAdded, onCancel, categories, selec
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('http://localhost:3000/api/transactions', 
-        { amount, description, category, date, accountId: selectedAccount },
+      await axios.post('http://localhost:3000/api/transactions',
+        { amount: parseFloat(amount), description, category, date },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      // After successful transaction addition, update budgets
+      await axios.post('http://localhost:3000/api/budgets/update-spent',
+        { category, amount: parseFloat(amount) },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       onTransactionAdded();
     } catch (error) {
+      console.error('Error adding transaction:', error);
       setError('Failed to add transaction');
     }
   };

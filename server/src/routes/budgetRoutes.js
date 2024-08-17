@@ -113,4 +113,21 @@ router.post('/check', authenticateToken, async (req, res) => {
   }
 });
 
+router.post('/update-spent', authenticateToken, async (req, res) => {
+  try {
+    const { category, amount } = req.body;
+    const budget = await Budget.findOne({ userId: req.user.id, category });
+    if (budget) {
+      budget.spent += amount;
+      await budget.save();
+      res.json({ message: 'Budget updated successfully' });
+    } else {
+      res.status(404).json({ error: 'Budget not found' });
+    }
+  } catch (error) {
+    console.error('Error updating budget spent amount:', error);
+    res.status(500).json({ error: 'Failed to update budget' });
+  }
+});
+
 module.exports = router;

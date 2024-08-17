@@ -1,44 +1,63 @@
 .dashboard-container {
-    padding-top: 30px;
-    padding-bottom: 30px;
-  }
-  
-  .loading-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-  }
-  
-  .app-bar {
-    background-color: #2196f3;
-  }
-  
-  .app-title {
-    flex-grow: 1;
-  }
-  
-  .error-message {
-    margin-bottom: 20px;
-    padding: 10px;
-    background-color: #ffebee;
-    border-radius: 4px;
-  }
-  
-  .plaid-button-container {
-    margin-bottom: 30px;
-    text-align: center;
-  }
-  
-  .balance-paper,
-  .insights-paper,
-  .section-paper {
-    padding: 20px;
-    height: 100%;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-  }
-  
-  .add-button {
-    margin-top: 20px;
-  }
+  padding-top: 30px;
+  padding-bottom: 30px;
+}
+
+.loading-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.app-bar {
+  background-color: #2196f3;
+}
+
+.app-title {
+  flex-grow: 1;
+}
+
+.error-message {
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #ffebee;
+  border-radius: 4px;
+}
+
+.plaid-button-container {
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.balance-paper,
+.insights-paper,
+.section-paper {
+  padding: 20px;
+  height: 100%;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+}
+
+.add-button {
+  margin-top: 20px;
+}
+
+/* New styles for the welcome container */
+.welcome-container {
+  background-color: #e3f2fd; /* Light blue background */
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  margin-bottom: 30px;
+}
+
+.welcome-container h3 {
+  color: #1976d2; /* Darker blue for the welcome text */
+  font-weight: 500;
+}
+
+.welcome-container .MuiTypography-subtitle1 {
+  margin-top: 10px;
+  color: #757575; /* Grey color for the Plaid connection status */
+}

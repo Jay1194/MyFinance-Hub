@@ -3,6 +3,20 @@ const router = express.Router();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { authenticateToken } = require('../middlewares/auth'); // Add this line
+
+router.get('/me', authenticateToken, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id).select('-password');
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    res.json(user);
+  } catch (error) {
+    console.error('Error fetching user data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 router.get('/users', async (req, res) => {
   try {
@@ -16,37 +30,32 @@ router.get('/users', async (req, res) => {
 
 router.post('/register', async (req, res) => {
   try {
-    console.log('Registration attempt:', req.body);
+    const { firstName, lastName, email, password } = req.body;
 
-    if (!req.body.email || !req.body.password) {
-      console.log('Registration failed: Email and password are required');
-      return res.status(400).json({ error: 'Email and password are required' });
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({ error: 'All fields are required' });
     }
 
-    const existingUser = await User.findOne({ email: req.body.email });
+    const existingUser = await User.findOne({ email });
     if (existingUser) {
-      console.log('Registration failed: Email already exists');
       return res.status(400).json({ error: 'Email already exists' });
     }
 
-    const hashedPassword = await bcrypt.hash(req.body.password, 10);
+    const hashedPassword = await bcrypt.hash(password, 10);
     const user = new User({
-      email: req.body.email,
+      firstName,
+      lastName,
+      email,
       password: hashedPassword,
     });
 
     await user.save();
-    console.log('User registered successfully:', user.email);
     res.status(201).json({ message: 'User registered successfully' });
   } catch (error) {
     console.error('Error during registration:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-// ... other routes ...
-
-module.exports = router;
 
 router.post('/login', async (req, res) => {
   try {

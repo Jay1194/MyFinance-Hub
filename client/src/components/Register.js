@@ -4,6 +4,8 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const Register = () => {
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -17,11 +19,14 @@ const Register = () => {
       return;
     }
     try {
-      console.log('Attempting to register with:', { email, password });
-      const response = await axios.post('http://localhost:3000/api/users/register', { email, password });
+      const response = await axios.post('http://localhost:3000/api/users/register', {
+        firstName,
+        lastName,
+        email,
+        password
+      });
       console.log('Registration response:', response.data);
       if (response.data.message === 'User registered successfully') {
-        // Redirect to login page after successful registration
         navigate('/login');
       } else {
         setError('Registration failed');
@@ -36,6 +41,22 @@ const Register = () => {
     <Container maxWidth="xs" className="register-container">
       <Typography variant="h4" gutterBottom>Register</Typography>
       <form onSubmit={handleSubmit}>
+        <TextField
+          label="First Name"
+          fullWidth
+          margin="normal"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          required
+        />
+        <TextField
+          label="Last Name"
+          fullWidth
+          margin="normal"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          required
+        />
         <TextField
           label="Email"
           type="email"
